@@ -6,9 +6,10 @@ import { authService } from '../services/api';
 export default function LoginPage() {
   const navigate = useNavigate();
   const [username, setUsername] = useState('admin');
-  const [password, setPassword] = useState('hradmin123');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const showDemoCredentials = import.meta.env.VITE_DEMO_AUTH_ENABLED === 'true';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,7 +19,7 @@ export default function LoginPage() {
       await authService.login(username, password);
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.detail || 'Invalid credentials. Use demo: admin / hradmin123');
+      setError(err.response?.data?.detail || 'Unable to sign in. Check your credentials and try again.');
     } finally {
       setLoading(false);
     }
@@ -80,7 +81,7 @@ export default function LoginPage() {
           <div className="mb-6">
             <h3 className="text-2xl font-bold text-white tracking-tight">HR Portal Access</h3>
             <p className="text-xs text-slate-400 mt-1">
-              Sign in with your demo HR credentials to access analytics and prediction tools.
+              Sign in with your HR credentials to access analytics and prediction tools.
             </p>
           </div>
 
@@ -102,7 +103,7 @@ export default function LoginPage() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 bg-slate-800/90 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition"
-                  placeholder="e.g. admin"
+                  placeholder="Enter your username"
                 />
               </div>
             </div>
@@ -132,28 +133,29 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Quick Demo Credentials Buttons */}
-          <div className="mt-6 pt-5 border-t border-slate-800">
-            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-2">
-              Quick One-Click Demo Credentials:
-            </span>
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => handleQuickFill('admin', 'hradmin123')}
-                className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-sky-300 border border-slate-700 flex items-center space-x-1.5 transition"
-              >
-                <span>Admin: admin / hradmin123</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickFill('analyst', 'analyst2026')}
-                className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-teal-300 border border-slate-700 flex items-center space-x-1.5 transition"
-              >
-                <span>Analyst: analyst / analyst2026</span>
-              </button>
+          {showDemoCredentials && (
+            <div className="mt-6 pt-5 border-t border-slate-800">
+              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-2">
+                Local demo accounts:
+              </span>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleQuickFill('admin', '')}
+                  className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-sky-300 border border-slate-700 flex items-center space-x-1.5 transition"
+                >
+                  <span>Admin username</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleQuickFill('analyst', '')}
+                  className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-teal-300 border border-slate-700 flex items-center space-x-1.5 transition"
+                >
+                  <span>Analyst username</span>
+                </button>
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="mt-4 flex items-center space-x-2 text-[11px] text-slate-400">
             <Info className="w-3.5 h-3.5 text-slate-400 shrink-0" />

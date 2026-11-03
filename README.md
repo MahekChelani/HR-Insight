@@ -247,7 +247,8 @@ cd ..
 
 To execute the training pipeline, split data, tune thresholds on validation, evaluate on unseen test data, and serialize models:
 ```powershell
-python -m backend.ml.train
+cd backend
+python -m ml.train
 ```
 *Output will confirm trained pipelines saved in `saved_models/` (`best_model.joblib`, `decision_tree.joblib`, `random_forest.joblib`, `metadata.json`, and `metrics_summary.json`).*
 
@@ -257,7 +258,8 @@ python -m backend.ml.train
 
 Start the FastAPI application on `http://127.0.0.1:8000`:
 ```powershell
-python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --reload
+cd backend
+python run.py
 ```
 *Open your browser at `http://127.0.0.1:8000/docs` to test interactive Swagger endpoints.*
 
@@ -273,8 +275,10 @@ npm run dev -- --host 127.0.0.1 --port 5173
 *Open your browser at `http://127.0.0.1:5173/`.*
 
 ### Demo Credentials:
-- **Admin:** `admin` / `hradmin123`
-- **Analyst:** `analyst` / `analyst2026`
+- Configure `HR_INSIGHT_ADMIN_PASSWORD` before starting the backend. Optionally set
+  `HR_INSIGHT_ANALYST_PASSWORD` to enable the analyst account. Copy `.env.example`
+  and set these values locally; production credentials belong in the hosting provider's
+  secret environment-variable settings.
 
 ---
 
@@ -352,3 +356,44 @@ Saved in the `screenshots/` directory for project reports and viva demonstration
 - **Domain:** Human Resource Analytics & Machine Learning
 - **Course:** Data Mining & Business Intelligence (DMBI)
 - **Year:** 2026
+
+## Production Deployment (Vercel + Render)
+
+The application is a Vite/React SPA in `frontend/` and a FastAPI API in `backend/`.
+The checked-in `frontend/vercel.json` enables client-side route fallback. The root
+`render.yaml` defines a Render web service and its health check.
+
+### Render API
+
+1. Push this repository to GitHub and create a Render Blueprint from it, or create a
+   Web Service with the repository root as its root directory.
+2. Use `pip install -r backend/requirements.txt` as the build command and
+   `uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port $PORT` as the start
+   command. The service listens on Render's assigned port.
+3. Configure `DATABASE_URL` with a managed PostgreSQL connection string. SQLite is for
+   local development only; Render's service filesystem is not persistent. On the first
+   PostgreSQL startup, the backend imports existing `model_metadata` and
+   `prediction_history` rows from `backend/hr_insight.db`, without replacing rows already
+   in PostgreSQL.
+4. Set `HR_INSIGHT_ADMIN_PASSWORD` to a strong secret. Optionally set
+   `HR_INSIGHT_ANALYST_PASSWORD`. The API starts with browser CORS closed until the
+   Vercel origin is known.
+5. Confirm `https://<render-service>/api/health` reports a healthy status and
+   `"database": "connected"`.
+
+### Vercel frontend
+
+1. Import the GitHub repository into Vercel and set the project root directory to
+   `frontend`. Build command: `npm run build`; output directory: `dist`.
+2. Set `VITE_API_URL` to `https://<render-service>/api`. It is embedded in the
+   frontend build, so configure it before deploying. Do not set backend secrets in
+   Vercel. Leave `VITE_DEMO_AUTH_ENABLED` unset in production.
+3. Set Render's `FRONTEND_ORIGINS` to the exact Vercel production origin(s), without a
+   trailing slash, then redeploy the Render service. Browser requests will be blocked
+   until this setting is present.
+
+Both platforms can deploy automatically on pushes to the connected GitHub branch.
+This project has no signup endpoint; account creation is not supported. The current
+login is a demo UI gate, not API authorization, so do not use it to protect sensitive
+employee information. API authorization and business-grade user management are not
+implemented.

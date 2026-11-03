@@ -1,7 +1,15 @@
 import axios from 'axios';
 
 // Base API client
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL
+  || (import.meta.env.DEV ? 'http://127.0.0.1:8000/api' : '');
+
+if (!API_BASE_URL) {
+  throw new Error('VITE_API_URL must be set to the deployed backend API URL for production builds.');
+}
+if (!import.meta.env.DEV && new URL(API_BASE_URL).protocol !== 'https:') {
+  throw new Error('VITE_API_URL must use HTTPS in production builds.');
+}
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,

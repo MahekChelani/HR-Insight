@@ -17,14 +17,14 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 
-from backend.ml.preprocessing import (
+from ml.preprocessing import (
     load_raw_dataset,
     clean_features,
     build_preprocessor,
     get_stratified_split,
     ALL_FEATURE_COLUMNS
 )
-from backend.ml.evaluation import (
+from ml.evaluation import (
     evaluate_model_performance,
     find_optimal_threshold
 )

@@ -6,6 +6,8 @@ __pycache__/
 
 # Environments
 .env
+.env.*
+!.env.example
 .venv
 env/
 venv/
@@ -42,8 +44,10 @@ pnpm-debug.log*
 Thumbs.db
 desktop.ini
 
-# SQLite databases
-# Keep tracked or exclude: We include hr_insight.db if clean, or ignore DB journal files
+# Local databases and database sidecars
+*.db
+*.sqlite
+*.sqlite3
 *.db-journal
 *.db-wal
 *.db-shm

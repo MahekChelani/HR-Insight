@@ -7,7 +7,7 @@ import os
 import joblib
 import pandas as pd
 import numpy as np
-from backend.ml.preprocessing import ALL_FEATURE_COLUMNS
+from ml.preprocessing import ALL_FEATURE_COLUMNS
 
 
 class PredictionEngine:
@@ -29,7 +29,7 @@ class PredictionEngine:
         if not os.path.exists(self.model_path):
             raise FileNotFoundError(
                 f"Model file not found at {self.model_path}. "
-                "Please run 'python -m backend.ml.train' to train and save the model."
+                "Please run 'python -m ml.train' from the backend directory to train and save the model."
             )
         self.pipeline = joblib.load(self.model_path)
         
