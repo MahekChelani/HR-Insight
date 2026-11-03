@@ -378,8 +378,9 @@ The checked-in `frontend/vercel.json` enables client-side route fallback. The ro
    `prediction_history` rows from `backend/hr_insight.db`, without replacing rows already
    in PostgreSQL.
 4. The Blueprint generates a private admin password. Retrieve or rotate it in Render's
-   service environment settings; optionally set `HR_INSIGHT_ANALYST_PASSWORD`. The API
-   starts with browser CORS closed until the Vercel origin is known.
+   service environment settings; optionally set `HR_INSIGHT_ANALYST_PASSWORD`. Set
+   `FRONTEND_ORIGINS` to the exact Vercel production origin, without a trailing slash,
+   when you use a different Vercel domain.
 5. Confirm `https://<render-service>/api/health` reports a healthy status and
    `"database": "connected"`.
 
@@ -390,9 +391,8 @@ The checked-in `frontend/vercel.json` enables client-side route fallback. The ro
 2. Set `VITE_API_URL` to `https://<render-service>/api`. It is embedded in the
    frontend build, so configure it before deploying. Do not set backend secrets in
    Vercel. Leave `VITE_DEMO_AUTH_ENABLED` unset in production.
-3. Set Render's `FRONTEND_ORIGINS` to the exact Vercel production origin(s), without a
-   trailing slash, then redeploy the Render service. Browser requests will be blocked
-   until this setting is present.
+3. If you use a different Vercel production domain, update Render's `FRONTEND_ORIGINS`
+   to that exact origin, without a trailing slash, and redeploy the Render service.
 
 Both platforms can deploy automatically on pushes to the connected GitHub branch.
 This project has no signup endpoint; account creation is not supported. The current
