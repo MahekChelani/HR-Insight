@@ -12,6 +12,16 @@ services:
       - key: ENVIRONMENT
         value: production
       - key: DATABASE_URL
-        sync: false
+        fromDatabase:
+          name: hr-insight-db
+          property: connectionString
       - key: HR_INSIGHT_ADMIN_PASSWORD
-        sync: false
+        generateValue: true
+
+databases:
+  - name: hr-insight-db
+    databaseName: hr_insight
+    user: hr_insight
+    plan: free
+    region: oregon
+    postgresMajorVersion: "18"

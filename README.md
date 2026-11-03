@@ -370,14 +370,16 @@ The checked-in `frontend/vercel.json` enables client-side route fallback. The ro
 2. Use `pip install -r backend/requirements.txt` as the build command and
    `uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port $PORT` as the start
    command. The service listens on Render's assigned port.
-3. Configure `DATABASE_URL` with a managed PostgreSQL connection string. SQLite is for
-   local development only; Render's service filesystem is not persistent. On the first
-   PostgreSQL startup, the backend imports existing `model_metadata` and
+3. The Blueprint provisions a free Render PostgreSQL database and connects it to the
+   service. The free database expires after 30 days; migrate to a paid persistent plan
+   before expiry to avoid losing production records. SQLite is for local development
+   only; Render's service filesystem is not persistent. On the first PostgreSQL startup,
+   the backend imports existing `model_metadata` and
    `prediction_history` rows from `backend/hr_insight.db`, without replacing rows already
    in PostgreSQL.
-4. Set `HR_INSIGHT_ADMIN_PASSWORD` to a strong secret. Optionally set
-   `HR_INSIGHT_ANALYST_PASSWORD`. The API starts with browser CORS closed until the
-   Vercel origin is known.
+4. The Blueprint generates a private admin password. Retrieve or rotate it in Render's
+   service environment settings; optionally set `HR_INSIGHT_ANALYST_PASSWORD`. The API
+   starts with browser CORS closed until the Vercel origin is known.
 5. Confirm `https://<render-service>/api/health` reports a healthy status and
    `"database": "connected"`.
 
