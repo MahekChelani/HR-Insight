@@ -1,5 +1,6 @@
-"""One-time, idempotent import of the checked-in SQLite records into production PostgreSQL."""
+"""One-time, idempotent import of local SQLite records into PostgreSQL."""
 import logging
+from pathlib import Path
 
 from sqlalchemy import MetaData, create_engine, select, text
 from sqlalchemy.dialects.postgresql import insert as postgresql_insert
@@ -13,6 +14,9 @@ logger = logging.getLogger(__name__)
 
 def migrate_legacy_sqlite_data(destination_engine=engine, source_path=DB_PATH) -> dict[str, int]:
     """Copy existing prediction and model metadata rows without replacing cloud records."""
+    if not Path(source_path).is_file():
+        return {}
+
     source_engine = create_engine(URL.create("sqlite", database=source_path))
     source_metadata = MetaData()
     source_metadata.reflect(bind=source_engine)
@@ -48,9 +52,12 @@ def migrate_legacy_sqlite_data(destination_engine=engine, source_path=DB_PATH) -
                     if destination_engine.dialect.name == "postgresql":
                         statement = postgresql_insert(destination_table).values(**values)
                         result = destination.execute(
-                            statement.on_conflict_do_nothing(index_elements=["id"])
+                            statement.on_conflict_do_nothing(
+                                index_elements=["id"]
+                            ).returning(destination_table.c.id)
                         )
-                        inserted += result.rowcount
+                        if result.scalar_one_or_none() is not None:
+                            inserted += 1
                     else:
                         destination.execute(destination_table.insert().values(**values))
                         inserted += 1

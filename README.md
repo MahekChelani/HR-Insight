@@ -373,10 +373,22 @@ The checked-in `frontend/vercel.json` enables client-side route fallback. The ro
 3. The Blueprint provisions a free Render PostgreSQL database and connects it to the
    service. The free database expires after 30 days; migrate to a paid persistent plan
    before expiry to avoid losing production records. SQLite is for local development
-   only; Render's service filesystem is not persistent. On the first PostgreSQL startup,
-   the backend imports existing `model_metadata` and
-   `prediction_history` rows from `backend/hr_insight.db`, without replacing rows already
-   in PostgreSQL.
+   only; Render's service filesystem is not persistent. SQLite files are intentionally
+   excluded from Git. To migrate local records, run the idempotent migration helper from
+   `backend/` with `DATABASE_URL` set to the Render external database URL while the
+   local `backend/hr_insight.db` is present:
+
+   ```powershell
+   Push-Location backend
+   $env:DATABASE_URL = "<Render external database URL>"
+   python -c "from app.database.migration import migrate_legacy_sqlite_data; print(migrate_legacy_sqlite_data())"
+   Remove-Item Env:DATABASE_URL
+   Pop-Location
+   ```
+
+   It copies `model_metadata` and `prediction_history` rows without overwriting existing
+   PostgreSQL records. The hosted service skips this step when the local SQLite file is
+   absent.
 4. The Blueprint generates a private admin password. Retrieve or rotate it in Render's
    service environment settings; optionally set `HR_INSIGHT_ANALYST_PASSWORD`. Set
    `FRONTEND_ORIGINS` to the exact Vercel production origin, without a trailing slash,
